@@ -10,12 +10,12 @@
   function looksLikeCallButton(el) {
     if (!el) return false;
     if (el.disabled) return false;
-    if (el.offsetParent === null) return false;
+    if (el.offsetParent === null) return false; // not visible
+
+    if (el.closest && el.closest('[aria-hidden="true"]')) return false;
 
     const text = (el.innerText || el.textContent || "").trim().toLowerCase();
-    return (
-      text === "call"
-    );
+    return text === "call";
   }
 
   function findCallButton() {
@@ -27,12 +27,23 @@
   }
 
   function tryClick() {
-    if (clickCount >= MAX_CLICKS) return clearInterval(intervalId);
+    if (clickCount >= MAX_CLICKS) {
+      clearInterval(intervalId);
+      return;
+    }
 
     const btn = findCallButton();
     if (btn) {
       console.log("✅ Found Call button, clicking:", btn);
       btn.click();
+
+      // Prevent focus staying on a soon-to-be-hidden modal/button (avoids the aria-hidden warning)
+      setTimeout(() => {
+        try {
+          document.activeElement?.blur?.();
+        } catch (e) {}
+      }, 0);
+
       clickCount++;
       clearInterval(intervalId);
     }
@@ -41,5 +52,3 @@
   tryClick();
   intervalId = setInterval(tryClick, SEARCH_INTERVAL_MS);
 })();
-
-
