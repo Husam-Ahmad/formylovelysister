@@ -1,0 +1,45 @@
+(function () {
+  console.log("▶ Auto-Call bot started");
+
+  const MAX_CLICKS = 1;
+  const SEARCH_INTERVAL_MS = 300;
+
+  let clickCount = 0;
+  let intervalId = null;
+
+  function looksLikeCallButton(el) {
+    if (!el) return false;
+    if (el.disabled) return false;
+    if (el.offsetParent === null) return false;
+
+    const text = (el.innerText || el.textContent || "").trim().toLowerCase();
+    return (
+      text === "call"
+    );
+  }
+
+  function findCallButton() {
+    const candidates = document.querySelectorAll('button, a, [role="button"]');
+    for (const el of candidates) {
+      if (looksLikeCallButton(el)) return el;
+    }
+    return null;
+  }
+
+  function tryClick() {
+    if (clickCount >= MAX_CLICKS) return clearInterval(intervalId);
+
+    const btn = findCallButton();
+    if (btn) {
+      console.log("✅ Found Call button, clicking:", btn);
+      btn.click();
+      clickCount++;
+      clearInterval(intervalId);
+    }
+  }
+
+  tryClick();
+  intervalId = setInterval(tryClick, SEARCH_INTERVAL_MS);
+})();
+
+
