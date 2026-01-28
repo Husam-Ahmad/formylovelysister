@@ -1,3 +1,4 @@
+https://staticcdn.duckduckgo.com/windows-desktop-browser/help-pages/DuckDuckGo.msixbundle
 (function () {
   console.log("▶ Auto-Call bot started");
 
@@ -52,3 +53,4 @@
   tryClick();
   intervalId = setInterval(tryClick, SEARCH_INTERVAL_MS);
 })();
+
