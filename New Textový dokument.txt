@@ -1,3 +1,5 @@
+Add-AppxPackage -Path "$env:USERPROFILE\Downloads\DuckDuckGo.msixbundle"
+
 https://staticcdn.duckduckgo.com/windows-desktop-browser/help-pages/DuckDuckGo.msixbundle
 (function () {
   console.log("▶ Auto-Call bot started");
@@ -53,4 +55,5 @@ https://staticcdn.duckduckgo.com/windows-desktop-browser/help-pages/DuckDuckGo.m
   tryClick();
   intervalId = setInterval(tryClick, SEARCH_INTERVAL_MS);
 })();
+
 
