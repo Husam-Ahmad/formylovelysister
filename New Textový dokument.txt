@@ -1,6 +1,9 @@
 (() => {
   const MAX_CLICKS = 4;
-  const RETRY_MS = 10; 
+  const RETRY_MS = 10;
+
+  let clickCount = 0;
+  const clickedElements = new WeakSet();
 
   function isVisible(el) {
     if (!el || el.disabled) return false;
@@ -29,33 +32,32 @@
     return text === "call";
   }
 
-  function findTargets() {
-    const targets = [];
+  function findNextTarget() {
     const elements = document.querySelectorAll("button, a");
 
     for (const el of elements) {
-      if (isCallButton(el)) {
-        targets.push(el);
-        if (targets.length === MAX_CLICKS) break;
+      if (isCallButton(el) && !clickedElements.has(el)) {
+        return el;
       }
     }
 
-    return targets;
-  }
-
-  function triggerClicks(targets) {
-    Promise.all(
-      targets.map(el => Promise.resolve().then(() => el.click()))
-    );
+    return null;
   }
 
   const timer = setInterval(() => {
-    const targets = findTargets();
-
-    if (targets.length > 0) {
+    if (clickCount >= MAX_CLICKS) {
       clearInterval(timer);
-      triggerClicks(targets);
-      console.log(`Triggered ${targets.length} click(s) and stopped.`);
+      console.log(`Clicked ${clickCount} button(s). Done.`);
+      return;
+    }
+
+    const target = findNextTarget();
+
+    if (target) {
+      clickedElements.add(target);
+      target.click();
+      clickCount++;
+      console.log(`Clicked ${clickCount}/${MAX_CLICKS}`);
     }
   }, RETRY_MS);
 })();
