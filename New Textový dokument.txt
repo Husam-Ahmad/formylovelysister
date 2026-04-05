@@ -1,9 +1,6 @@
 (() => {
   const MAX_CLICKS = 4;
-  const RETRY_MS = 10;
-
-  let clickCount = 0;
-  const clickedElements = new WeakSet();
+  const RETRY_MS = 100;
 
   function isVisible(el) {
     if (!el || el.disabled) return false;
@@ -32,32 +29,33 @@
     return text === "call";
   }
 
-  function findNextTarget() {
+  function findTargets() {
+    const targets = [];
     const elements = document.querySelectorAll("button, a");
 
     for (const el of elements) {
-      if (isCallButton(el) && !clickedElements.has(el)) {
-        return el;
+      if (isCallButton(el)) {
+        targets.push(el);
+        if (targets.length === MAX_CLICKS) break;
       }
     }
 
-    return null;
+    return targets;
+  }
+
+  function clickSequentially(targets) {
+    for (const el of targets) {
+      el.click(); // one by one, immediately after each other
+    }
   }
 
   const timer = setInterval(() => {
-    if (clickCount >= MAX_CLICKS) {
+    const targets = findTargets();
+
+    if (targets.length > 0) {
       clearInterval(timer);
-      console.log(`Clicked ${clickCount} button(s). Done.`);
-      return;
-    }
-
-    const target = findNextTarget();
-
-    if (target) {
-      clickedElements.add(target);
-      target.click();
-      clickCount++;
-      console.log(`Clicked ${clickCount}/${MAX_CLICKS}`);
+      clickSequentially(targets);
+      console.log(`Clicked ${targets.length} Call button(s) sequentially and stopped.`);
     }
   }, RETRY_MS);
 })();
