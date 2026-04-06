@@ -1,6 +1,9 @@
 (() => {
   const MAX_CLICKS = 4;
-  const RETRY_MS = 100;
+  let clickCount = 0;
+  let stopped = false;
+
+  const clickedElements = new WeakSet();
 
   function isVisible(el) {
     if (!el || el.disabled) return false;
@@ -29,33 +32,62 @@
     return text === "call";
   }
 
-  function findTargets() {
+  function findTargets(limit) {
     const targets = [];
     const elements = document.querySelectorAll("button, a");
 
     for (const el of elements) {
-      if (isCallButton(el)) {
+      if (isCallButton(el) && !clickedElements.has(el)) {
+        clickedElements.add(el);
         targets.push(el);
-        if (targets.length === MAX_CLICKS) break;
+
+        if (targets.length >= limit) break;
       }
     }
 
     return targets;
   }
 
-  function clickSequentially(targets) {
+  function stop(observer) {
+    if (stopped) return;
+    stopped = true;
+    observer.disconnect();
+    console.log(`Clicked ${clickCount} button(s). Done.`);
+  }
+
+  function scanAndClick(observer) {
+    if (stopped) return;
+
+    const remaining = MAX_CLICKS - clickCount;
+    if (remaining <= 0) {
+      stop(observer);
+      return;
+    }
+
+    const targets = findTargets(remaining);
+    if (targets.length === 0) return;
+
     for (const el of targets) {
-      el.click(); // one by one, immediately after each other
+      el.click();
+    }
+
+    clickCount += targets.length;
+    console.log(`Clicked ${clickCount}/${MAX_CLICKS}`);
+
+    if (clickCount >= MAX_CLICKS) {
+      stop(observer);
     }
   }
 
-  const timer = setInterval(() => {
-    const targets = findTargets();
+  const observer = new MutationObserver(() => {
+    scanAndClick(observer);
+  });
 
-    if (targets.length > 0) {
-      clearInterval(timer);
-      clickSequentially(targets);
-      console.log(`Clicked ${targets.length} Call button(s) sequentially and stopped.`);
-    }
-  }, RETRY_MS);
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true
+  });
+
+  scanAndClick(observer);
 })();
