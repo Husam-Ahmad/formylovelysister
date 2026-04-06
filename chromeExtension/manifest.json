@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Fast Call Clicker",
+  "version": "1.0",
+  "description": "Clicks up to 4 visible Call buttons as fast as possible on the current page.",
+  "permissions": ["activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Fast Call Clicker"
+  }
+}
