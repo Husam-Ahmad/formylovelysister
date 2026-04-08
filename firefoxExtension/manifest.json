@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Fast Call Clicker",
-  "version": "2.0",
-  "description": "Toggle auto-clicking of all visible Call buttons.",
+  "version": "1.0",
+  "description": "Clicks up to 4 visible Call buttons as fast as possible on the current page.",
   "permissions": ["activeTab", "scripting"],
   "background": {
-    "scripts": ["background.js"],
-    "service_worker": "background.js"
+    "scripts": ["background.js"]
   },
   "action": {
     "default_title": "Fast Call Clicker"
