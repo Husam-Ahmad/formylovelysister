@@ -1,9 +1,9 @@
 (() => {
-  const MAX_CLICKS = 4;
-  let clickCount = 0;
-  let stopped = false;
+  if (window.__fastCallClickerInitialized) return;
+  window.__fastCallClickerInitialized = true;
 
-  const clickedElements = new WeakSet();
+  let running = false;
+  let loopActive = false;
 
   function isVisible(el) {
     if (!el || el.disabled) return false;
@@ -25,69 +25,95 @@
     if (!el.matches("button, a")) return false;
     if (!isVisible(el)) return false;
 
-    const text = (el.innerText || el.textContent || "")
-      .trim()
-      .toLowerCase();
+    const text = (el.innerText || el.textContent || "").trim().toLowerCase();
 
     return text === "call";
   }
 
-  function findTargets(limit) {
+  function findTargets(maxCount = 4) {
     const targets = [];
     const elements = document.querySelectorAll("button, a");
 
     for (const el of elements) {
-      if (isCallButton(el) && !clickedElements.has(el)) {
-        clickedElements.add(el);
+      if (isCallButton(el)) {
         targets.push(el);
 
-        if (targets.length >= limit) break;
+        if (targets.length >= maxCount) {
+          break;
+        }
       }
     }
 
     return targets;
   }
 
-  function stop(observer) {
-    if (stopped) return;
-    stopped = true;
-    observer.disconnect();
-    console.log(`Clicked ${clickCount} button(s). Done.`);
-  }
-
-  function scanAndClick(observer) {
-    if (stopped) return;
-
-    const remaining = MAX_CLICKS - clickCount;
-    if (remaining <= 0) {
-      stop(observer);
-      return;
-    }
-
-    const targets = findTargets(remaining);
-    if (targets.length === 0) return;
-
-    for (const el of targets) {
-      el.click();
-    }
-
-    clickCount += targets.length;
-    console.log(`Clicked ${clickCount}/${MAX_CLICKS}`);
-
-    if (clickCount >= MAX_CLICKS) {
-      stop(observer);
+  function fastClick(el) {
+    try {
+      ["mousedown", "mouseup", "click"].forEach(type => {
+        el.dispatchEvent(new MouseEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        }));
+      });
+    } catch (err) {
+      try {
+        el.click();
+      } catch (_) {}
     }
   }
 
-  const observer = new MutationObserver(() => {
-    scanAndClick(observer);
-  });
+  function runLoop() {
+    if (loopActive) return;
+    loopActive = true;
 
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true,
-    attributes: true
-  });
+    const tick = () => {
+      if (!running) {
+        loopActive = false;
+        return;
+      }
 
-  scanAndClick(observer);
+      const targets = findTargets(4);
+
+      if (targets.length > 0) {
+        for (const el of targets) {
+          fastClick(el);
+        }
+
+        console.log(`Fast Call Clicker: clicked ${targets.length} button(s).`);
+        loopActive = false;
+        return;
+      }
+
+      setTimeout(tick, 0);
+    };
+
+    tick();
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    console.log("Fast Call Clicker: ON");
+    runLoop();
+  }
+
+  function stop() {
+    running = false;
+    console.log("Fast Call Clicker: OFF");
+  }
+
+  const api = globalThis.browser || globalThis.chrome;
+
+  api.runtime.onMessage.addListener((message) => {
+    if (!message || !message.type) return;
+
+    if (message.type === "START_CLICKER") {
+      start();
+    }
+
+    if (message.type === "STOP_CLICKER") {
+      stop();
+    }
+  });
 })();
