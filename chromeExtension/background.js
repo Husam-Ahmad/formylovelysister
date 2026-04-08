@@ -44,4 +44,4 @@ api.runtime.onMessage.addListener((message, sender) => {
     setBadge(tabId, "OFF", "#6b7280");
     console.log(`Fast Call Clicker: clicked ${message.count} button(s).`);
   }
-});
+}); 
