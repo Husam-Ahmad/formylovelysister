@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Fast Call Clicker",
   "version": "2.0",
-  "description": "Toggle auto-clicking of all visible Call buttons.",
+  "description": "10.4 23:17.",
   "permissions": ["activeTab", "scripting"],
   "background": {
     "scripts": ["background.js"],
