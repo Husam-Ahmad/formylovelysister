@@ -25,12 +25,14 @@
     if (!el.matches("button, a")) return false;
     if (!isVisible(el)) return false;
 
-    const text = (el.innerText || el.textContent || "").trim();
+    const text = (el.innerText || el.textContent || "")
+      .trim()
+      .toLowerCase();
 
-    return text === "Call" || text === "call";
+    return text === "call";
   }
 
-  function findTargets(maxCount = 4) {
+  function findTargets(limit) {
     const targets = [];
     const elements = document.querySelectorAll("button, a");
 
@@ -38,9 +40,7 @@
       if (isCallButton(el)) {
         targets.push(el);
 
-        if (targets.length >= maxCount) {
-          break;
-        }
+        if (targets.length >= limit) break;
       }
     }
 
@@ -63,20 +63,43 @@
     }
   }
 
-  function scanUntilFound() {
+  function runOnce() {
     return new Promise((resolve) => {
-      const tick = () => {
-        const targets = findTargets(4);
+      const MAX_CLICKS = 4;
+      let stopped = false;
 
-        if (targets.length > 0) {
-          resolve(targets);
-          return;
+      function stop(observer, count) {
+        if (stopped) return;
+        stopped = true;
+        observer.disconnect();
+        resolve(count);
+      }
+
+      function scanAndClick(observer) {
+        if (stopped) return;
+
+        const targets = findTargets(MAX_CLICKS);
+
+        if (targets.length === 0) return;
+
+        for (const el of targets) {
+          fastClick(el);
         }
 
-        setTimeout(tick, 0);
-      };
+        stop(observer, targets.length);
+      }
 
-      tick();
+      const observer = new MutationObserver(() => {
+        scanAndClick(observer);
+      });
+
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true
+      });
+
+      scanAndClick(observer);
     });
   }
 
@@ -90,13 +113,7 @@
       let count = 0;
 
       try {
-        const targets = await scanUntilFound();
-
-        count = targets.length;
-
-        for (const el of targets) {
-          fastClick(el);
-        }
+        count = await runOnce();
       } catch (err) {
         console.error("Fast Call Clicker content error:", err);
       } finally {
