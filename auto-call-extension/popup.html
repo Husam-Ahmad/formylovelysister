@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            min-width: 250px;
+            padding: 16px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            background: #fff;
+        }
+        h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        #status {
+            font-size: 13px;
+            margin-bottom: 14px;
+            padding: 8px 10px;
+            border-radius: 6px;
+        }
+        .status-busy {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+        .status-idle {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #28a745;
+        }
+        .status-off {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #dc3545;
+        }
+        #doneBtn {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background: #28a745;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        #doneBtn:hover { background: #218838; }
+        #doneBtn:disabled { background: #aaa; cursor: default; }
+        .hint {
+            margin-top: 10px;
+            font-size: 11px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h3>Auto Call</h3>
+    <div id="status" class="status-off">Loading...</div>
+    <button id="doneBtn" disabled>Call is Done</button>
+    <div class="hint">Shortcut: Alt+D</div>
+    <script src="popup.js"></script>
+</body>
+</html>

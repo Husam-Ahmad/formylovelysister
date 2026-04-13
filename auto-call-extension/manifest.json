@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Auto Call Button Clicker",
+  "version": "1.6",
+  "description": "Auto-clicks Call for patients. Detects call in progress via URL.",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Auto Call - Active"
+  }
+}
